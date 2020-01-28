@@ -9,9 +9,11 @@ public class Game : MonoBehaviour
     public GameObject racketLeft;
     public GameObject racketRight;
     public GameObject hint;
+    public GameObject winnerMessage;
 
     public Text roundsPlayedText;
     public Text maxNumberOfPointsText;
+    public Text winnerMessageText;
 
     public AudioSource soundGameWon;
 
@@ -36,6 +38,7 @@ public class Game : MonoBehaviour
         roundsPlayedText.text = currentRound.ToString() + " / " + maxNumberOfRounds;
 
         hint.SetActive(true);
+        winnerMessage.SetActive(false);
     }
 
     void Update()
@@ -59,9 +62,11 @@ public class Game : MonoBehaviour
         isInputEnabled = false;
 
         GetComponent<Score>().Increment(index);
-        currentRound = currentRound +1;
+        currentRound++;
 
-        shootParticles(index == 0 ? "left" : "right");
+        shootParticles(
+            ball.GetComponent<Rigidbody2D>().position, 
+            index == 0 ? "left" : "right");
 
         ball.GetComponent<Ball>().Freeze();
         racketLeft.GetComponent<Racket>().Freeze();
@@ -69,10 +74,11 @@ public class Game : MonoBehaviour
 
         CancelInvoke("IncreaseBallSpeed");
 
-        if (currentRound <= maxNumberOfRounds && !GetComponent<Score>().maxPointsReached()) {
+        if (!maxRoundsReached() && !GetComponent<Score>().maxPointsReached()) {
+            // Start next round
             StartCoroutine(resetPlayfield());
         } else {
-            GetComponent<Timer>().Stop();
+            EndGame();
         }
     }
 
@@ -92,21 +98,57 @@ public class Game : MonoBehaviour
         racketRight.GetComponent<Racket>().Reset();    
     }
 
+    private void EndGame()
+    {
+        GetComponent<Timer>().Stop();
+
+        winnerMessage.SetActive(true);
+
+        string text = "";
+        switch(GetComponent<Score>().GetLeadingPlayer()) {
+            case 0:
+                text = "Player 1 Wins";
+                break;
+
+            case 1:
+                text = "Player 2 Wins";
+                break;
+            
+            case -1:
+                text = "Draw";
+                break;
+        }
+        
+        winnerMessageText.text = text;
+
+        shootParticles(new Vector2(0, 0), "up");
+    }
+
     private void IncreaseBallSpeed()
     {
         ball.GetComponent<Ball>().IncreaseSpeed();
     }
 
-    private void shootParticles(string direction)
+    private bool maxRoundsReached() 
     {
-        particleSystem.transform.position = ball.GetComponent<Rigidbody2D>().position;
+        return currentRound > maxNumberOfRounds;
+    }
+
+    private void shootParticles(Vector2 position, string direction)
+    {
+        particleSystem.transform.position = position;
 
         switch (direction) {
             case "left":
                 particleSystem.transform.rotation = Quaternion.Euler(180.0f, 90.0f, 0.0f);
                 break;
+
             case "right":
                 particleSystem.transform.rotation = Quaternion.Euler(180.0f, -90.0f, 0.0f);
+                break;
+
+            case "up":
+                particleSystem.transform.rotation = Quaternion.Euler(-90.0f, 90.0f, 0.0f);
                 break;
         }
 

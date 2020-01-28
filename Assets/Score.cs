@@ -15,6 +15,17 @@ public class Score : MonoBehaviour
         SetText();
     }
 
+    public int GetLeadingPlayer()
+    {
+        if (points[0] > points[1])
+            return 0;
+        
+        if (points[0] < points[1])
+            return 1;
+
+        return -1;
+    }
+
     void Update()
     {
         if (playerOneText.text != points[0].ToString() || playerTwoText.text != points[1].ToString()) 
