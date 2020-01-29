@@ -867,7 +867,6 @@ MonoBehaviour:
   winnerMessageText: {fileID: 419131802}
   soundGameWon: {fileID: 0}
   particleSystem: {fileID: 0}
-  isInputEnabled: 1
   maxNumberOfPoints: 0
   maxNumberOfRounds: 0
   currentRound: 1

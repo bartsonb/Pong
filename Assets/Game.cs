@@ -20,7 +20,6 @@ public class Game : MonoBehaviour
     public ParticleSystem particleSystem;
 
     private bool roundInProgress = false;
-    public bool isInputEnabled = true;
 
     public int maxNumberOfPoints;
     public int maxNumberOfRounds;
@@ -59,14 +58,10 @@ public class Game : MonoBehaviour
 
     public void PlayerScored(int index) 
     {
-        isInputEnabled = false;
-
         GetComponent<Score>().Increment(index);
         currentRound++;
 
-        shootParticles(
-            ball.GetComponent<Rigidbody2D>().position, 
-            index == 0 ? "left" : "right");
+        shootParticles(index == 0 ? "left" : "right");
 
         ball.GetComponent<Ball>().Freeze();
         racketLeft.GetComponent<Racket>().Freeze();
@@ -78,6 +73,7 @@ public class Game : MonoBehaviour
             // Start next round
             StartCoroutine(resetPlayfield());
         } else {
+            // End the game
             EndGame();
         }
     }
@@ -87,7 +83,6 @@ public class Game : MonoBehaviour
         yield return new WaitForSeconds(2);
 
         roundInProgress = false;
-        isInputEnabled = true;
 
         hint.SetActive(true);
 
@@ -102,26 +97,10 @@ public class Game : MonoBehaviour
     {
         GetComponent<Timer>().Stop();
 
-        winnerMessage.SetActive(true);
-
-        string text = "";
-        switch(GetComponent<Score>().GetLeadingPlayer()) {
-            case 0:
-                text = "Player 1 Wins";
-                break;
-
-            case 1:
-                text = "Player 2 Wins";
-                break;
-            
-            case -1:
-                text = "Draw";
-                break;
-        }
-        
-        winnerMessageText.text = text;
-
-        shootParticles(new Vector2(0, 0), "up");
+        winnerMessage.SetActive(true);   
+        winnerMessageText.text = (GetComponent<Score>().GetLeadingPlayer() != -1) 
+            ? "Player " + (GetComponent<Score>().GetLeadingPlayer() + 1) + " Wins" 
+            : "Draw";
     }
 
     private void IncreaseBallSpeed()
@@ -134,9 +113,9 @@ public class Game : MonoBehaviour
         return currentRound > maxNumberOfRounds;
     }
 
-    private void shootParticles(Vector2 position, string direction)
+    private void shootParticles(string direction)
     {
-        particleSystem.transform.position = position;
+        particleSystem.transform.position = ball.GetComponent<Rigidbody2D>().position;
 
         switch (direction) {
             case "left":
@@ -145,10 +124,6 @@ public class Game : MonoBehaviour
 
             case "right":
                 particleSystem.transform.rotation = Quaternion.Euler(180.0f, -90.0f, 0.0f);
-                break;
-
-            case "up":
-                particleSystem.transform.rotation = Quaternion.Euler(-90.0f, 90.0f, 0.0f);
                 break;
         }
 

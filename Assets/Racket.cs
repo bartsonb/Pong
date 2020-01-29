@@ -21,10 +21,8 @@ public class Racket : MonoBehaviour
 
     private void FixedUpdate() 
     {
-        if (Game.isInputEnabled) {
-            float v = Input.GetAxisRaw(axis);
-            GetComponent<Rigidbody2D>().velocity = new Vector2(0, v) * speed;
-        }
+        float v = Input.GetAxisRaw(axis);
+        GetComponent<Rigidbody2D>().velocity = new Vector2(0, v) * speed;
     }
 
     public void Reset()
